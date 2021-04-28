@@ -17,6 +17,7 @@
 package com.zhihu.matisse.internal.entity;
 
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 
 import androidx.annotation.StyleRes;
 
@@ -57,6 +58,7 @@ public final class SelectionSpec {
     public int originalMaxSize;
     public OnCheckedListener onCheckedListener;
     public boolean showPreview;
+    public List<Uri> selectedImgs;
 
     private SelectionSpec() {
     }
@@ -93,6 +95,9 @@ public final class SelectionSpec {
         autoHideToobar = false;
         originalMaxSize = Integer.MAX_VALUE;
         showPreview = true;
+        if(selectedImgs!=null){
+            selectedImgs.clear();
+        }
     }
 
     public boolean singleSelectionModeEnabled() {

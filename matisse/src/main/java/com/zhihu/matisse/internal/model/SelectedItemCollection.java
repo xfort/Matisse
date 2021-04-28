@@ -29,6 +29,7 @@ import com.zhihu.matisse.internal.utils.PathUtils;
 import com.zhihu.matisse.internal.utils.PhotoMetadataUtils;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -121,6 +122,14 @@ public class SelectedItemCollection {
             } else {
                 if (mCollectionType == COLLECTION_MIXED) {
                     refineCollectionType();
+                }
+            }
+        } else {
+            Iterator<Item> its = mItems.iterator();
+            while (its.hasNext()) {
+                Item item1 = its.next();
+                if (item1.id == item.id) {
+                    mItems.remove(item1);
                 }
             }
         }
@@ -250,7 +259,13 @@ public class SelectedItemCollection {
     }
 
     public int checkedNumOf(Item item) {
-        int index = new ArrayList<>(mItems).indexOf(item);
-        return index == -1 ? CheckView.UNCHECKED : index + 1;
+        int index = 1;
+        for (Item itemObj : mItems) {
+            if (itemObj.id == item.id) {
+                return index;
+            }
+            index++;
+        }
+        return CheckView.UNCHECKED;
     }
 }

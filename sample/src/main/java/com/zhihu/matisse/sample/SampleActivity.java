@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.collection.ArrayMap;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -40,6 +41,8 @@ import com.zhihu.matisse.engine.impl.PicassoEngine;
 import com.zhihu.matisse.filter.Filter;
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class SampleActivity extends AppCompatActivity implements View.OnClickListener {
@@ -47,6 +50,7 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
     private static final int REQUEST_CODE_CHOOSE = 23;
 
     private UriAdapter mAdapter;
+    ArrayMap<Uri, String> checkedImgs = new ArrayMap();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +85,7 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
     private void startAction(View v) {
         switch (v.getId()) {
             case R.id.zhihu:
+                Uri[] uris=new Uri[checkedImgs.size()];
                 Matisse.from(SampleActivity.this)
                         .choose(MimeType.ofImage(), false)
                         .countable(true)
@@ -104,6 +109,7 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
                         .setOnCheckedListener(isChecked -> {
                             Log.e("isChecked", "onCheck: isChecked=" + isChecked);
                         })
+                        .selectedImgs(Arrays.asList(checkedImgs.keySet().toArray(uris)))
                         .forResult(REQUEST_CODE_CHOOSE);
                 break;
             case R.id.dracula:
@@ -146,6 +152,12 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_CHOOSE && resultCode == RESULT_OK) {
             mAdapter.setData(Matisse.obtainResult(data), Matisse.obtainPathResult(data));
+            List<Uri> resUri = Matisse.obtainResult(data);
+
+            for (int index = 0; index < resUri.size(); index++) {
+                checkedImgs.put(resUri.get(index), "");
+            }
+
             Log.e("OnActivityResult ", String.valueOf(Matisse.obtainOriginalState(data)));
         }
     }
