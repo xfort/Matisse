@@ -70,7 +70,7 @@ public class SampleActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onClick(final View v) {
         RxPermissions rxPermissions = new RxPermissions(this);
-        rxPermissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        rxPermissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.CAMERA)
                 .subscribe(aBoolean -> {
                     if (aBoolean) {
                         startAction(v);

@@ -16,6 +16,8 @@
 package com.zhihu.matisse.internal.utils;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -24,9 +26,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
-import androidx.fragment.app.Fragment;
-import androidx.core.content.FileProvider;
+
 import androidx.core.os.EnvironmentCompat;
+import androidx.fragment.app.Fragment;
 
 import com.zhihu.matisse.internal.entity.CaptureStrategy;
 
@@ -42,9 +44,9 @@ public class MediaStoreCompat {
 
     private final WeakReference<Activity> mContext;
     private final WeakReference<Fragment> mFragment;
-    private       CaptureStrategy         mCaptureStrategy;
-    private       Uri                     mCurrentPhotoUri;
-    private       String                  mCurrentPhotoPath;
+    private CaptureStrategy mCaptureStrategy;
+    private Uri mCurrentPhotoUri;
+    private String mCurrentPhotoPath;
 
     public MediaStoreCompat(Activity activity) {
         mContext = new WeakReference<>(activity);
@@ -74,17 +76,17 @@ public class MediaStoreCompat {
     public void dispatchCaptureIntent(Context context, int requestCode) {
         Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (captureIntent.resolveActivity(context.getPackageManager()) != null) {
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            if (photoFile != null) {
-                mCurrentPhotoPath = photoFile.getAbsolutePath();
-                mCurrentPhotoUri = FileProvider.getUriForFile(mContext.get(),
-                        mCaptureStrategy.authority, photoFile);
+//            File photoFile = null;
+//            try {
+////                photoFile = createImageFile();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+            mCurrentPhotoUri = createImageUri();
+            if (mCurrentPhotoUri != null) {
+                mCurrentPhotoPath = PathUtils.getPath(mContext.get(),mCurrentPhotoUri);
+//                mCurrentPhotoUri = FileProvider.getUriForFile(mContext.get(),
+//                        mCaptureStrategy.authority, photoFile);
                 captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCurrentPhotoUri);
                 captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
@@ -103,6 +105,22 @@ public class MediaStoreCompat {
                 }
             }
         }
+    }
+
+    Uri createImageUri() {
+        ContentResolver contentResolver = mContext.get().getContentResolver();
+        Uri imgs;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            imgs = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+        } else {
+            imgs = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        }
+        ContentValues newImgValue = new ContentValues();
+        String timeStamp =
+                new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = String.format("JPEG_%s.jpg", timeStamp);
+        newImgValue.put(MediaStore.Images.Media.DISPLAY_NAME, imageFileName);
+        return contentResolver.insert(imgs, newImgValue);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

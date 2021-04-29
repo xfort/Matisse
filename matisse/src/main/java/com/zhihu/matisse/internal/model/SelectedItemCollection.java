@@ -129,7 +129,7 @@ public class SelectedItemCollection {
             while (its.hasNext()) {
                 Item item1 = its.next();
                 if (item1.id == item.id) {
-                    mItems.remove(item1);
+                    its.remove();
                 }
             }
         }
